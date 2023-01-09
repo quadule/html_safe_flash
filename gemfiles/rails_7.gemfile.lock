@@ -1,5 +1,5 @@
 PATH
-  remote: .
+  remote: ..
   specs:
     html_safe_flash (0.1.0)
       rails (>= 6)
@@ -192,6 +192,7 @@ DEPENDENCIES
   appraisal
   html_safe_flash!
   minitest (~> 5.17)
+  rails (~> 7.0)
   rake (~> 13.0)
   rubocop-minitest (~> 0.25)
   standard (~> 1.21)
