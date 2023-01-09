@@ -1,0 +1,6 @@
+require:
+  - standard
+  - rubocop-minitest
+
+inherit_gem:
+  standard: config/base.yml

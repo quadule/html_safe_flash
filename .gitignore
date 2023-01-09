@@ -1,0 +1,6 @@
+.DS_Store
+/.bundle/
+/doc/
+/log/*.log
+/pkg/
+/tmp/
