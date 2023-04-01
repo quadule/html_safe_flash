@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
 require "active_support/concern"
-require "active_support/core_ext/array/wrap"
 require "active_support/core_ext/module/attribute_accessors_per_thread"
-require "active_support/core_ext/object/try"
 
 module HtmlSafeFlash
   module FlashHashExtension
@@ -31,17 +29,16 @@ module HtmlSafeFlash
     HTML_SAFE_KEYS = "_html_safe_keys"
 
     def deserialize_html_safe_values
-      Array.wrap(@flashes.delete(HTML_SAFE_KEYS)).each do |key|
-        value = @flashes[key]
-        if value.respond_to?(:html_safe)
-          @flashes[key] = value.html_safe
-        end
+      safe_keys = @flashes.delete(HTML_SAFE_KEYS)
+      safe_values = @flashes.slice(*safe_keys)
+      safe_values.each do |key, value|
+        @flashes[key] = html_safe_value_or_array(value)
       end
     end
 
     def serialize_html_safe_values
       safe_keys = @flashes.except(*@discard).filter_map do |key, value|
-        key if value.is_a?(ActiveSupport::SafeBuffer) && value.html_safe?
+        key if html_safe_string?(value) || html_safe_array?(value)
       end
 
       if safe_keys.empty?
@@ -49,6 +46,26 @@ module HtmlSafeFlash
       else
         @flashes[HTML_SAFE_KEYS] = safe_keys
       end
+    end
+
+    def html_safe_value_or_array(value)
+      if value.respond_to?(:html_safe)
+        value.html_safe
+      elsif value.is_a?(Array)
+        value.map do |item|
+          item.respond_to?(:html_safe) ? item.html_safe : item
+        end
+      else
+        value
+      end
+    end
+
+    def html_safe_array?(value)
+      value.is_a?(Array) && value.any? && value.all?(&method(:html_safe_string?))
+    end
+
+    def html_safe_string?(value)
+      value.is_a?(ActiveSupport::SafeBuffer) && value.html_safe?
     end
   end
 end

@@ -5,24 +5,48 @@ class FlashHashExtensionTest < ActiveSupport::TestCase
     assert ActionDispatch::Flash::FlashHash.handle_html_safe_flash
   end
 
-  test "deserializes a html_safe string" do
+  test "deserializes html_safe strings and arrays" do
     flash = ActionDispatch::Flash::FlashHash.from_session_value(
       "discard" => [],
-      "flashes" => {"html" => "<em>one</em>", "text" => "two", "_html_safe_keys" => ["html"]}
+      "flashes" => {
+        "html" => "<em>one</em>",
+        "more" => ["<p>one</p>".html_safe, "<p>two</p>".html_safe],
+        "text" => "two",
+        "_html_safe_keys" => ["html", "more"]
+      }
     )
-    assert_equal({"html" => "<em>one</em>", "text" => "two"}, flash.to_hash)
+    assert_equal(
+      {
+        "html" => "<em>one</em>",
+        "more" => ["<p>one</p>", "<p>two</p>"],
+        "text" => "two"
+      },
+      flash.to_hash
+    )
     assert flash[:html].html_safe?
+    assert flash[:more][0].html_safe?
+    assert flash[:more][1].html_safe?
     refute flash[:text].html_safe?
   end
 
-  test "serializes a html_safe string" do
+  test "serializes html_safe strings and arrays" do
     flash = ActionDispatch::Flash::FlashHash.new(
-      {"html" => "<em>one</em>".html_safe, "text" => "two", "old" => "other".html_safe},
+      {
+        "html" => "<em>one</em>".html_safe,
+        "more" => ["<p>one</p>".html_safe, "<p>two</p>".html_safe],
+        "text" => "two",
+        "old" => "other".html_safe
+      },
       ["old"]
     )
     assert_equal({
       "discard" => [],
-      "flashes" => {"html" => "<em>one</em>", "text" => "two", "_html_safe_keys" => ["html"]}
+      "flashes" => {
+        "html" => "<em>one</em>",
+        "more" => ["<p>one</p>", "<p>two</p>"],
+        "text" => "two",
+        "_html_safe_keys" => ["html", "more"]
+      }
     }, flash.to_session_value)
   end
 
@@ -30,7 +54,11 @@ class FlashHashExtensionTest < ActiveSupport::TestCase
     ActionDispatch::Flash::FlashHash.handle_html_safe_flash = false
     session_value = {
       "discard" => [],
-      "flashes" => {"html" => "<em>one</em>", "text" => "two", "_html_safe_keys" => ["html"]}
+      "flashes" => {
+        "html" => "<em>one</em>",
+        "text" => "two",
+        "_html_safe_keys" => ["html"]
+      }
     }
     flash = ActionDispatch::Flash::FlashHash.from_session_value(session_value)
     assert_equal session_value["flashes"], flash.to_hash
