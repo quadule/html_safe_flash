@@ -1,26 +1,21 @@
 # frozen_string_literal: true
 
 require "active_support/concern"
-require "active_support/core_ext/module/attribute_accessors_per_thread"
 
 module HtmlSafeFlash
   module FlashHashExtension
     extend ActiveSupport::Concern
 
-    prepended do
-      thread_mattr_accessor :handle_html_safe_flash, instance_writer: false, default: true
-    end
-
     class_methods do
       def from_session_value(*)
         super.tap do |flash|
-          flash.send(:deserialize_html_safe_values) if handle_html_safe_flash
+          flash.send(:deserialize_html_safe_values)
         end
       end
     end
 
     def to_session_value
-      serialize_html_safe_values if handle_html_safe_flash
+      serialize_html_safe_values
       super
     end
 
