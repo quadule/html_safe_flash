@@ -1,2 +1,2 @@
 ignore:
-  - test/unit/rails_flash_hash_test.rb
+  - test/rails/flash_hash_test.rb
