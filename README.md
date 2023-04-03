@@ -1,10 +1,15 @@
 # html_safe_flash
 Use `html_safe` strings naturally in Rails flash messages.
 
-## Usage
-Just store any `html_safe` string in a flash message!
+## Installation
+Add this line to your application's Gemfile anywhere after `rails`:
 
-Since Rails 4.1+ (which switched to JSON as the default cookie serializer), code like this does not work as one might expect:
+```ruby
+gem "html_safe_flash"
+```
+
+## Usage
+Store any `html_safe` string (or an array of them) in the Rails `flash` object:
 
 ```ruby
 class PostsController < ApplicationController
@@ -16,13 +21,8 @@ class PostsController < ApplicationController
 end
 ```
 
-Calling `html_safe` on the string returns a `ActiveSupport::SafeBuffer` object.
-When Rails serializes it to the session cookie, this object is stored as a normal string, losing its `html_safe?` status when loaded on the next page. 
-
-Some applications work around this issue by rendering every flash message with `html_safe` or `raw`.
-This isn't always a problem, but can easily create a cross-site scripting security vulnerability if a message ever includes unescaped user input.
-
-With this gem installed however, `flash[:success].html_safe?` will return true on the next request because html_safe metadata is tracked internally — `html_safe_flash` patches `ActionDispatch::Flash::FlashHash` to store something like this in the session:
+This gem patches `ActionDispatch::Flash::FlashHash` to track any `html_safe` values internally.
+In the example above, this is the actual flash data stored in the session cookie:
 
 ```json
 {
@@ -31,14 +31,18 @@ With this gem installed however, `flash[:success].html_safe?` will return true o
 }
 ```
 
-On the next request, the message is automatically converted back to a `ActiveSupport::SafeBuffer` and the extra metadata is removed.
+On the next request, the `_html_safe_keys` metadata is removed and the `success` message is converted back to an `ActiveSupport::SafeBuffer` automatically.
 
-## Installation
-Add this line to your application's Gemfile after `rails`:
+Without this gem, the code above would not work as one might expect:
+Calling `html_safe` on the message returns a `ActiveSupport::SafeBuffer` object, which becomes a normal string when Rails stores it in the session cookie.
+When the cookie is loaded on the next page, the `html_safe?` state of the message would be lost.
 
-```ruby
-gem "html_safe_flash"
-```
+## Why?
+
+Using `html_safe` like this was possible in old versions of Rails, which serialized cookies using `Marshal`, allowing arbitrary objects like `ActiveSupport::SafeBuffer` to be stored.
+In Rails 4.1 this was changed for security reasons, and cookie data is limited to the basic types supported by the default `JSON` serializer.
+
+Without a way to store `html_safe` values, some applications work around the issue by rendering every flash message with `html_safe` or `raw`. This can become a cross-site scripting security vulnerability if a message ever includes unescaped user input.
 
 ## License
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).

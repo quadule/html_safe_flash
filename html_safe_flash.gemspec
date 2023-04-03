@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
   spec.version = HtmlSafeFlash::VERSION
   spec.authors = ["Milo Winningham"]
   spec.email = ["milo@winningham.net"]
-  spec.summary = "Allows normal usage of html_safe strings in Rails flash messages"
+  spec.summary = "Use html_safe strings naturally in Rails flash messages"
   spec.homepage = "https://github.com/quadule/html_safe_flash"
   spec.license = "MIT"
 
