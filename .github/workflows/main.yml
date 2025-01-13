@@ -14,12 +14,15 @@ jobs:
     strategy:
       matrix:
         rails:
-          - '6.1'
-          - '7'
+          - '7.0'
+          - '7.1'
+          - '7.2'
+          - '8'
           - 'main'
         ruby:
+          - '3.4'
+          - '3.3'
           - '3.2'
-          - '3.1'
     env:
       BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/rails_${{ matrix.rails }}.gemfile
     steps:
