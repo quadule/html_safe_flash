@@ -10,7 +10,8 @@ class FlashHashExtensionTest < ActiveSupport::TestCase
       "discard" => [],
       "flashes" => {
         "html" => "<em>one</em>",
-        "more" => ["<p>one</p>".html_safe, "<p>two</p>".html_safe],
+        "more" => ["<p>one</p>", "<p>two</p>"],
+        "part" => ["a", "<b>b</b>", "c"],
         "text" => "two",
         "_html_safe_keys" => ["html", "more"]
       }
@@ -19,6 +20,7 @@ class FlashHashExtensionTest < ActiveSupport::TestCase
       {
         "html" => "<em>one</em>",
         "more" => ["<p>one</p>", "<p>two</p>"],
+        "part" => ["a", "<b>b</b>", "c"],
         "text" => "two"
       },
       flash.to_hash
@@ -26,6 +28,7 @@ class FlashHashExtensionTest < ActiveSupport::TestCase
     assert flash[:html].html_safe?
     assert flash[:more][0].html_safe?
     assert flash[:more][1].html_safe?
+    refute flash[:part].any?(&:html_safe?)
     refute flash[:text].html_safe?
   end
 
@@ -34,6 +37,7 @@ class FlashHashExtensionTest < ActiveSupport::TestCase
       {
         "html" => "<em>one</em>".html_safe,
         "more" => ["<p>one</p>".html_safe, "<p>two</p>".html_safe],
+        "part" => ["a", "<b>b</b>".html_safe, "c"],
         "text" => "two",
         "old" => "other".html_safe
       },
@@ -44,6 +48,7 @@ class FlashHashExtensionTest < ActiveSupport::TestCase
       "flashes" => {
         "html" => "<em>one</em>",
         "more" => ["<p>one</p>", "<p>two</p>"],
+        "part" => ["a", "<b>b</b>", "c"],
         "text" => "two",
         "_html_safe_keys" => ["html", "more"]
       }
